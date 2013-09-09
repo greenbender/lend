@@ -1,0 +1,3 @@
+*.o
+ld32test
+ld32test.exe
