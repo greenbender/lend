@@ -308,7 +308,7 @@ static int CHECK_DATA66(unsigned char v) {
     return
         (v & 0xc7) == 0x05 ||
         (v & 0xf8) == 0xb8 ||
-        (v & 0x7e) == 0x68 ||\
+        (v & 0x7e) == 0x68 ||
         v == 0x81 ||
         v == 0x9a ||
         v == 0xa9 ||
