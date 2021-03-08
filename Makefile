@@ -21,7 +21,7 @@ LDFLAGS=-m32 -Oz
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS:.c=.o)
 
-ld32test: $(OBJS)
+test: $(OBJS)
 
 clean:
 	rm -f $(OBJS)

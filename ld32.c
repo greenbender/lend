@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define DATA1_T  (1 << 3)
 #define DATA2_T  (1 << 4)
 #define DATA66_T (1 << 5)
+#define DATA12_T (1 << 6)
 
 
 /* configure tables */
@@ -111,25 +112,26 @@ static int CHECK_0F(unsigned char v) {
 #if defined(USE_T) && (USE_T & MODRM2_T)
 static const unsigned int modrm2_t[] = {
            /* 0 1 2 3 4 5 6 7  8 9 a b c d e f */
-    BITMASK32(1,1,1,1,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 0 */
-              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0), /* 1 */
-    BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 2 */
-              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0), /* 3 */
-    BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 4 */
-              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0), /* 5 */
-    BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 6 */
-              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0), /* 7 */
+    BITMASK32(1,1,1,1,0,0,0,0, 0,0,0,0,0,1,0,0,  /* 0 */
+              1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1), /* 1 */
+    BITMASK32(1,1,1,1,0,0,0,0, 1,1,1,1,1,1,1,1,  /* 2 */
+              0,0,0,0,0,0,0,0, 1,0,1,0,0,0,0,0), /* 3 */
+    BITMASK32(1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,  /* 4 */
+              1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1), /* 5 */
+    BITMASK32(1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,  /* 6 */
+              1,1,1,1,1,1,1,0, 1,1,1,1,1,1,1,1), /* 7 */
     BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 8 */
               1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1), /* 9 */
-    BITMASK32(0,0,0,1,1,1,0,0, 0,0,0,1,1,1,0,1,  /* a */
-              1,1,1,1,1,1,1,1, 0,0,1,1,1,1,1,1), /* b */
-    BITMASK32(1,1,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* c */
-              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0), /* d */
-    BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* e */
-              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0)  /* f */
+    BITMASK32(0,0,0,1,1,1,0,0, 0,0,0,1,1,1,1,1,  /* a */
+              1,1,1,1,1,1,1,1, 1,0,1,1,1,1,1,1), /* b */
+    BITMASK32(1,1,1,1,1,1,1,1, 0,0,0,0,0,0,0,0,  /* c */
+              1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1), /* d */
+    BITMASK32(1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,  /* e */
+              1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,0)  /* f */
 };
 #define CHECK_MODRM2(v) CHECK_TABLE(modrm2_t, v)
 #else
+/* TODO: Fix this */
 static int CHECK_MODRM2(unsigned char v) {
     unsigned char a = v & 0xfc;
     unsigned char b = v & 0xfe;
@@ -149,15 +151,60 @@ static int CHECK_MODRM2(unsigned char v) {
 
 
 /* CHECK_DATA12 */
+#if defined(USE_T) && (USE_T & DATA12_T)
+static const unsigned int data12_t[] = {
+           /* 0 1 2 3 4 5 6 7  8 9 a b c d e f */
+    BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 0 */
+              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0), /* 1 */
+    BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 2 */
+              0,0,0,0,0,0,0,0, 0,0,1,0,0,0,0,0), /* 3 */
+    BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 4 */
+              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0), /* 5 */
+    BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 6 */
+              1,1,1,1,0,0,0,0, 0,0,0,0,0,0,0,0), /* 7 */
+    BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* 8 */
+              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0), /* 9 */
+    BITMASK32(0,0,0,0,1,0,0,0, 0,0,0,0,1,0,0,0,  /* a */
+              0,0,0,0,0,0,0,0, 0,0,1,0,0,0,0,0), /* b */
+    BITMASK32(0,0,1,0,1,1,1,0, 0,0,0,0,0,0,0,0,  /* c */
+              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0), /* d */
+    BITMASK32(0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  /* e */
+              0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0)  /* f */
+};
+#define CHECK_DATA12(v) CHECK_TABLE(data12_t, v)
+#else
 static int CHECK_DATA12(unsigned char v) {
-    return v == 0xa4 || v == 0xac || v == 0xba;
+    return
+        (v & 0xfc) == 0x70 ||
+        v == 0x3a ||
+        v == 0xa4 ||
+        v == 0xac ||
+        v == 0xba ||
+        v == 0xc2 ||
+        v == 0xc4 ||
+        v == 0xc5 ||
+        v == 0xc6;
 }
+#endif
 
 
 /* CHECK_DATA662 */
 static int CHECK_DATA662(unsigned char v) {
     return (v & 0xf0) == 0x80;
 }
+
+
+/* CHECK_CRDR2 - For MOV from/to CRx/DRx/TRx mod=3 */
+static int CHECK_CRDR2(unsigned char v) {
+    return (v & 0xfc) == 0x20;
+}
+
+
+/* CHECK_OP3 - 3 byte opcode */
+static int CHECK_OP3(unsigned char v) {
+    return v == 0x38 || v == 0x3a;
+}
+
 
 
 /* CHECK_MODRM */
@@ -324,12 +371,13 @@ static int CHECK_MEM67(unsigned char v) {
 
 
 /* length_disasm */
-unsigned int length_disasm(void *opcode0) {
-    unsigned char op, modrm, mod, rm;
-    unsigned char *opcode = opcode0;
+unsigned int length_disasm(const void *opcode0) {
+    const unsigned char *opcode = opcode0;
     unsigned int flag = 0;
+    unsigned int crdr = 0;
     unsigned int ddef = 4, mdef = 4;
     unsigned int msize = 0, dsize = 0;
+    unsigned char op;
 
 prefix:
     op = *opcode++;
@@ -347,12 +395,14 @@ prefix:
         if (CHECK_MODRM2(op)) flag++;
         if (CHECK_DATA12(op)) dsize++;
         if (CHECK_DATA662(op)) dsize += ddef;
+        if (CHECK_OP3(op)) opcode++;
+        if (CHECK_CRDR2(op)) crdr++;
     }
 
     /* one byte opcode */
     else {
         if (CHECK_MODRM(op)) flag++;
-        if (CHECK_TEST(op) && !(*opcode & 0x38)) dsize += (op & 1) ? ddef : 1;
+        if (CHECK_TEST(op) && !(*opcode & 0x30)) dsize += (op & 1) ? ddef : 1;
         if (CHECK_DATA1(op)) dsize++;
         if (CHECK_DATA2(op)) dsize += 2;
         if (CHECK_DATA66(op)) dsize += ddef;
@@ -361,12 +411,12 @@ prefix:
 
     /* modrm */
     if (flag) {
-        modrm = *opcode++;
-        mod = modrm & 0xc0;
-        rm  = modrm & 0x07;
-        if (mod != 0xc0) {
-            if (mod == 0x40) msize++;
-            if (mod == 0x80) msize += mdef;
+        unsigned char modrm = *opcode++;
+        unsigned char mod = crdr ? 0x03 : modrm >> 6;
+        unsigned char rm  = modrm & 0x07;
+        if (mod != 0x03) {
+            if (mod == 0x01) msize++;
+            if (mod == 0x02) msize += mdef;
             if (mdef == 2) {
                 if ((mod == 0x00) && (rm == 0x06)) msize += 2;
             } else {
