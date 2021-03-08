@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
         return -3;
     }
 
-    op = addr = mmap(NULL, buf.st_size, PROT_READ, MAP_FILE|MAP_PRIVATE, fd, 0);
+    op = addr = mmap(NULL, buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (addr == MAP_FAILED) {
         perror("mmap");
         return -4;

@@ -206,7 +206,6 @@ static int CHECK_OP3(unsigned char v) {
 }
 
 
-
 /* CHECK_MODRM */
 #if defined(USE_T) && (USE_T & MODRM_T)
 static const unsigned int modrm_t[] = {

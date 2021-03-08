@@ -15,8 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 CC=clang
-CFLAGS=-m32 -Oz
-LDFLAGS=-m32 -Oz
+CFLAGS=-m32 -ansi -Wall -Wextra -Oz
+LDFLAGS=-m32 -Wall -Wextra -Oz
 
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS:.c=.o)
