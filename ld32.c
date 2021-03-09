@@ -83,9 +83,8 @@ static int CHECK_PREFIX(unsigned char v) {
     return
         (v & 0xe7) == 0x26 ||
         (v & 0xfc) == 0x64 ||
-        v == 0xf0 ||
-        v == 0xf2 ||
-        v == 0xf3;
+        (v & 0xfe) == 0xf2 ||
+        v == 0xf0;
 }
 #endif
 
@@ -253,7 +252,7 @@ static int CHECK_TEST(unsigned char v) {
 }
 
 
-/* CHECK_DATA1 */
+/* CHECK_DATA1 - imm8 */
 #if defined(USE_T) && (USE_T & DATA1_T)
 static const unsigned int data1_t[] = {
            /* 0 1 2 3 4 5 6 7  8 9 a b c d e f */
@@ -298,7 +297,8 @@ static int CHECK_DATA1(unsigned char v) {
 #endif
 
 
-/* CHECK_DATA2 */
+/* CHECK_DATA2 - imm16 or ptr16:16/32 (the two additional bytes *must* be added
+ * for this to work for both cases, and for ENTER which is imm8 and imm16 */
 #if defined(USE_T) && (USE_T & DATA2_T)
 static const unsigned int data2_t[] = {
            /* 0 1 2 3 4 5 6 7  8 9 a b c d e f */
@@ -373,10 +373,9 @@ static int CHECK_MEM67(unsigned char v) {
 /* length_disasm */
 unsigned int length_disasm(const void *opcode0) {
     const unsigned char *opcode = opcode0;
-    unsigned int flag = 0;
-    unsigned int crdr = 0;
-    unsigned int ddef = 4, mdef = 4;
+    unsigned int flag = 0, crdr = 0;
     unsigned int msize = 0, dsize = 0;
+    unsigned int ddef = 4, mdef = 4;
     unsigned char op;
 
     /* prefix */
@@ -391,18 +390,18 @@ unsigned int length_disasm(const void *opcode0) {
         op = *opcode++;
         if (CHECK_MODRM2(op)) flag = 1;
         if (CHECK_DATA12(op)) dsize = 1;
-        if (CHECK_DATA662(op)) dsize += ddef;
-        if (CHECK_OP3(op)) opcode++;
+        else if (CHECK_DATA662(op)) dsize = ddef;
         if (CHECK_CRDR2(op)) crdr = 1;
+        if (CHECK_OP3(op)) opcode++;
     }
 
     /* one byte opcode */
     else {
         if (CHECK_MODRM(op)) flag = 1;
-        if (CHECK_TEST(op) && !(*opcode & 0x30)) dsize += (op & 1) ? ddef : 1;
-        if (CHECK_DATA1(op)) dsize++;
+        if (CHECK_DATA1(op)) dsize = 1;
+        else if (CHECK_DATA66(op)) dsize = ddef;
         if (CHECK_DATA2(op)) dsize += 2;
-        if (CHECK_DATA66(op)) dsize += ddef;
+        if (CHECK_TEST(op) && !(*opcode & 0x30)) dsize += (op & 1) ? ddef : 1;
         if (CHECK_MEM67(op)) msize = mdef;
     }
 
@@ -425,5 +424,5 @@ unsigned int length_disasm(const void *opcode0) {
 
     opcode += msize + dsize;
 
-    return opcode - (unsigned char *)opcode0;
+    return opcode - (const unsigned char *)opcode0;
 }
