@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* configure tables */
 #ifndef USE_T
-#define USE_T (MODRM2_T|MODRM_T|DATA1_T|DATA66_T)
+#define USE_T (MODRM2_T|MODRM_T|DATA1_T|DATA66_T|DATA12_T)
 #endif
 
 
@@ -360,6 +360,7 @@ static int CHECK_DATA66(unsigned char v) {
         v == 0xa9 ||
         v == 0xc7 ||
         v == 0xea;
+}
 #endif
 
 
@@ -378,42 +379,39 @@ unsigned int length_disasm(const void *opcode0) {
     unsigned int msize = 0, dsize = 0;
     unsigned char op;
 
-prefix:
-    op = *opcode++;
-
     /* prefix */
-    if (CHECK_PREFIX(op)) {
+    do {
+        op = *opcode++;
         if (CHECK_PREFIX_66(op)) ddef = 2;
-        else if (CHECK_PREFIX_67(op)) mdef = 2;
-        goto prefix;
-    }
+        if (CHECK_PREFIX_67(op)) mdef = 2;
+    } while (CHECK_PREFIX(op));
 
     /* two byte opcode */
     if (CHECK_0F(op)) {
         op = *opcode++;
-        if (CHECK_MODRM2(op)) flag++;
-        if (CHECK_DATA12(op)) dsize++;
+        if (CHECK_MODRM2(op)) flag = 1;
+        if (CHECK_DATA12(op)) dsize = 1;
         if (CHECK_DATA662(op)) dsize += ddef;
         if (CHECK_OP3(op)) opcode++;
-        if (CHECK_CRDR2(op)) crdr++;
+        if (CHECK_CRDR2(op)) crdr = 1;
     }
 
     /* one byte opcode */
     else {
-        if (CHECK_MODRM(op)) flag++;
+        if (CHECK_MODRM(op)) flag = 1;
         if (CHECK_TEST(op) && !(*opcode & 0x30)) dsize += (op & 1) ? ddef : 1;
         if (CHECK_DATA1(op)) dsize++;
         if (CHECK_DATA2(op)) dsize += 2;
         if (CHECK_DATA66(op)) dsize += ddef;
-        if (CHECK_MEM67(op)) msize += mdef;
+        if (CHECK_MEM67(op)) msize = mdef;
     }
 
     /* modrm */
     if (flag) {
         unsigned char modrm = *opcode++;
         unsigned char mod = crdr ? 0x03 : modrm >> 6;
-        unsigned char rm  = modrm & 0x07;
         if (mod != 0x03) {
+            unsigned char rm  = modrm & 0x07;
             if (mod == 0x01) msize++;
             if (mod == 0x02) msize += mdef;
             if (mdef == 2) {
